@@ -335,14 +335,14 @@ def draw_profile_screen():
     WINDOW.fill(current_theme_color)
 
     # Приветствие
-    welcome_text = big_font.render(f"Привет, {current_user}!", True, BLACK)
+    welcome_text = small_font.render(f"Привет, {current_user}!", True, BLACK)
     welcome_rect = welcome_text.get_rect(center=(WINDOW_WIDTH // 2, 60))
     WINDOW.blit(welcome_text, welcome_rect)
 
     # Кнопки профиля
     buttons = [
-        (profile_btn1, "МОЯ СТАТИСТИКА", profile_btn_hover[0]),
-        (profile_btn2, "КУПИТЬ ПОДПИСКУ", profile_btn_hover[1]),
+        (profile_btn1, "Калькулятор", profile_btn_hover[0]),
+        (profile_btn2, "Перевод из двоичной в деситичную", profile_btn_hover[1]),
         (profile_btn3, "МОИ ДОСТИЖЕНИЯ", profile_btn_hover[2]),
         (profile_btn4, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[3]),
         (profile_btn5, "ПОМОЩЬ", profile_btn_hover[4]),
@@ -430,7 +430,7 @@ def show_message(msg, is_error=True):
     pygame.time.wait(1500)
 
 
-# Главный игровой цикл
+# Главный цикл
 clock = pygame.time.Clock()
 running = True
 
@@ -470,12 +470,32 @@ while running:
             submit_btn_hover = False
             back_btn_hover = False
 
+
     elif current_screen == "profile":
         login_btn_hover = False
         register_btn_hover = False
         back_btn_hover = False
         submit_btn_hover = False
         logout_btn_hover = logout_btn_rect.collidepoint(mouse_pos)
+        # Обновляем наведение для всех кнопок профиля
+        profile_btn_hover[0] = profile_btn1.collidepoint(mouse_pos)
+        profile_btn_hover[1] = profile_btn2.collidepoint(mouse_pos)
+        profile_btn_hover[2] = profile_btn3.collidepoint(mouse_pos)
+        profile_btn_hover[3] = profile_btn4.collidepoint(mouse_pos)
+        profile_btn_hover[4] = profile_btn5.collidepoint(mouse_pos)
+        profile_btn_hover[5] = profile_btn6.collidepoint(mouse_pos)
+        profile_btn_hover[6] = profile_btn7.collidepoint(mouse_pos)
+        profile_btn_hover[7] = profile_btn8.collidepoint(mouse_pos)
+        profile_btn_hover[8] = profile_btn9.collidepoint(mouse_pos)
+        profile_btn_hover[9] = profile_btn10.collidepoint(mouse_pos)
+        profile_btn_hover[10] = profile_btn11.collidepoint(mouse_pos)
+        profile_btn_hover[11] = profile_btn12.collidepoint(mouse_pos)
+        profile_btn_hover[12] = profile_btn13.collidepoint(mouse_pos)
+        profile_btn_hover[13] = profile_btn14.collidepoint(mouse_pos)
+        profile_btn_hover[14] = profile_btn15.collidepoint(mouse_pos)
+        profile_btn_hover[15] = profile_btn16.collidepoint(mouse_pos)
+        profile_btn_hover[16] = profile_btn17.collidepoint(mouse_pos)
+        profile_btn_hover[17] = profile_btn18.collidepoint(mouse_pos)
 
     elif current_screen == "settings":
         login_btn_hover = False
@@ -601,13 +621,23 @@ while running:
                         save_settings(settings)
                         current_screen = "menu"
 
-                        # Обновляем наведение для всех кнопок профиля
-                        profile_btn_hover[0] = profile_btn1.collidepoint(mouse_pos)
-                        profile_btn_hover[1] = profile_btn2.collidepoint(mouse_pos)
-                        profile_btn_hover[2] = profile_btn3.collidepoint(mouse_pos)
-                        profile_btn_hover[3] = profile_btn4.collidepoint(mouse_pos)
-                        profile_btn_hover[4] = profile_btn5.collidepoint(mouse_pos)
-                        profile_btn_hover[5] = profile_btn6.collidepoint(mouse_pos)
+                    elif profile_btn1.collidepoint(event.pos):
+                        current_screen == "seting"
+
+                    elif profile_btn2.collidepoint(event.pos):
+                        show_message("Подписка - 500 руб/мес", False)
+
+                    elif profile_btn3.collidepoint(event.pos):
+                        show_message("Ваши достижения: Новичок", False)
+
+                    elif profile_btn4.collidepoint(event.pos):
+                        current_screen = "profile_settings"  # Можно создать новый экран
+
+                    elif profile_btn5.collidepoint(event.pos):
+                        show_message("Напишите на support@example.com", False)
+
+                    elif profile_btn6.collidepoint(event.pos):
+                        show_message("Версия 1.0.0", False)
 
         if event.type == pygame.KEYDOWN and current_screen in ["login", "register"]:
             if event.key == pygame.K_RETURN:
