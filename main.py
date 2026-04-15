@@ -86,13 +86,19 @@ profile_btn4 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 360, 300, 50)
 profile_btn5 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 430, 300, 50)
 profile_btn6 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 500, 300, 50)
 
-profile_btn7 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 150, 300, 50)
-profile_btn2 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 220, 300, 50)
-profile_btn3 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 290, 300, 50)
-profile_btn4 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 360, 300, 50)
-profile_btn5 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 430, 300, 50)
-profile_btn6 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 500, 300, 50)
+profile_btn7 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 150, 300, 50)
+profile_btn8 = pygame.Rect(WINDOW_WIDTH // 2 -130, 220, 300, 50)
+profile_btn9 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 290, 300, 50)
+profile_btn10 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 360, 300, 50)
+profile_btn11 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 430, 300, 50)
+profile_btn12 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 500, 300, 50)
 
+profile_btn13 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 150, 300, 50)
+profile_btn14 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 220, 300, 50)
+profile_btn15 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 290, 300, 50)
+profile_btn16 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 360, 300, 50)
+profile_btn17 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 430, 300, 50)
+profile_btn18 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 500, 300, 50)
 
 def load_users():
     """Загружает пользователей из файла"""
@@ -202,7 +208,7 @@ logout_btn_hover = False
 settings_icon_hover = False
 kal = False
 color_buttons_hover = [False] * len(color_buttons)
-profile_btn_hover = [False] * 6
+profile_btn_hover = [False] * 18
 # Текущий экран
 if saved_user and saved_user in users:
     current_screen = "profile"
@@ -341,6 +347,18 @@ def draw_profile_screen():
         (profile_btn4, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[3]),
         (profile_btn5, "ПОМОЩЬ", profile_btn_hover[4]),
         (profile_btn6, "О ПРОГРАММЕ", profile_btn_hover[5]),
+        (profile_btn7, "МОЯ СТАТИСТИКА", profile_btn_hover[6]),
+        (profile_btn8, "КУПИТЬ ПОДПИСКУ", profile_btn_hover[7]),
+        (profile_btn9, "МОИ ДОСТИЖЕНИЯ", profile_btn_hover[8]),
+        (profile_btn10, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[9]),
+        (profile_btn11, "ПОМОЩЬ", profile_btn_hover[10]),
+        (profile_btn12, "О ПРОГРАММЕ", profile_btn_hover[11]),
+        (profile_btn13, "МОЯ СТАТИСТИКА", profile_btn_hover[12]),
+        (profile_btn14, "КУПИТЬ ПОДПИСКУ", profile_btn_hover[13]),
+        (profile_btn15, "МОИ ДОСТИЖЕНИЯ", profile_btn_hover[14]),
+        (profile_btn16, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[15]),
+        (profile_btn17, "ПОМОЩЬ", profile_btn_hover[16]),
+        (profile_btn18, "О ПРОГРАММЕ", profile_btn_hover[17]),
     ]
 
     for btn_rect, btn_text, is_hover in buttons:
