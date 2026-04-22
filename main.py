@@ -1,379 +1,409 @@
-import pygame
-import sys
-import json
-import os
+import pygame  # Импорт библиотеки для создания игр и графических приложений
+import sys  # Импорт для работы с системными функциями (например, выход из программы)
+import json  # Импорт для работы с JSON-файлами (хранение данных)
+import os  # Импорт для работы с операционной системой (проверка существования файлов)
 
-# Инициализация Pygame
-pygame.init()
+# ========== ИНИЦИАЛИЗАЦИЯ PYGAME ==========
+pygame.init()  # Запуск всех модулей Pygame (обязательная команда)
 
-# Настройки окна
-WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 800
-WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("")
+# ========== НАСТРОЙКИ ОКНА ==========
+WINDOW_WIDTH = 1000  # Ширина окна приложения в пикселях
+WINDOW_HEIGHT = 800  # Высота окна приложения в пикселях
+WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))  # Создание окна с заданными размерами
+pygame.display.set_caption("Калькулятор")  # Установка заголовка окна (пустая строка = без названия)
 
-# Цвета
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-BLUE = (100, 100, 255)
-DARK_BLUE = (50, 50, 200)
-GREEN = (100, 255, 100)
-DARK_GREEN = (50, 200, 50)
-RED = (255, 100, 100)
-DARK_RED = (200, 50, 50)
-GRAY = (200, 200, 200)
-DARK_GRAY = (150, 150, 150)
-PURPLE = (200, 100, 255)
-ORANGE = (255, 165, 0)
-YELLOW = (255, 255, 100)
-PINK = (255, 192, 203)
-LIGHT_BLUE = (173, 216, 230)
+# ========== ОПРЕДЕЛЕНИЕ ЦВЕТОВ В ФОРМАТЕ RGB ==========
+WHITE = (255, 255, 255)  # Белый цвет (максимум красного, зеленого, синего)
+BLACK = (0, 0, 0)  # Черный цвет (отсутствие всех цветов)
+BLUE = (100, 100, 255)  # Голубовато-синий цвет
+DARK_BLUE = (50, 50, 200)  # Темно-синий цвет (для эффекта наведения)
+GREEN = (100, 255, 100)  # Светло-зеленый цвет
+DARK_GREEN = (50, 200, 50)  # Темно-зеленый цвет
+RED = (255, 100, 100)  # Светло-красный цвет
+DARK_RED = (200, 50, 50)  # Темно-красный цвет
+GRAY = (200, 200, 200)  # Светло-серый цвет
+DARK_GRAY = (150, 150, 150)  # Темно-серый цвет
+PURPLE = (200, 100, 255)  # Фиолетовый цвет
+ORANGE = (255, 165, 0)  # Оранжевый цвет
+YELLOW = (255, 255, 100)  # Желтый цвет
+PINK = (255, 192, 203)  # Розовый цвет
+LIGHT_BLUE = (173, 216, 230)  # Голубой цвет
 
-# Файл для сохранения настроек
-SETTINGS_FILE = "settings.json"
+# ========== КНОПКИ КАЛЬКУЛЯТОРА (координаты и текст) ==========
+buttons = [
+    ('7', 50, 150), ('8', 150, 150), ('9', 250, 150), ('/', 350, 150),  # Первый ряд: цифры 7,8,9 и деление
+    ('4', 50, 220), ('5', 150, 220), ('6', 250, 220), ('*', 350, 220),  # Второй ряд: цифры 4,5,6 и умножение
+    ('1', 50, 290), ('2', 150, 290), ('3', 250, 290), ('-', 350, 290),  # Третий ряд: цифры 1,2,3 и вычитание
+    ('0', 50, 360), ('.', 150, 360), ('=', 250, 360), ('+', 350, 360),  # Четвертый ряд: 0, точка, равно, сложение
+    ('C', 50, 430), ('⌫', 150, 430)  # Пятый ряд: очистка (C) и удаление последнего символа (⌫)
+]
+
+# ========== НАСТРОЙКИ ФАЙЛОВ ==========
+SETTINGS_FILE = "settings.json"  # Имя файла для сохранения настроек приложения
 
 
-# Загрузка настроек
+# ========== ФУНКЦИЯ ЗАГРУЗКИ НАСТРОЕК ==========
 def load_settings():
-    # Загружает настройки из файла
-    default_settings = {
-        "theme_color": BLUE,  # Цвет темы по умолчанию
-        "theme_color_name": "Синий",
-        "saved_user": None  # Сохраненный пользователь
+    """Загружает настройки из файла settings.json"""
+    default_settings = {  # Настройки по умолчанию (если файла нет)
+        "theme_color": BLUE,  # Цвет темы по умолчанию - синий
+        "theme_color_name": "Синий",  # Название цвета для отображения
+        "saved_user": None  # Сохраненный пользователь (автовход)
     }
 
-    if os.path.exists(SETTINGS_FILE):
-        try:
-            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                # Преобразуем цвет из списка в кортеж
-                if "theme_color" in data:
-                    data["theme_color"] = tuple(data["theme_color"])
-                return data
-        except:
-            return default_settings
-    return default_settings
+    if os.path.exists(SETTINGS_FILE):  # Проверяем, существует ли файл с настройками
+        try:  # Пытаемся прочитать файл
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:  # Открываем файл для чтения
+                data = json.load(f)  # Загружаем данные из JSON
+                if "theme_color" in data:  # Если в файле есть цвет темы
+                    data["theme_color"] = tuple(data["theme_color"])  # Преобразуем список в кортеж (для Pygame)
+                return data  # Возвращаем загруженные настройки
+        except:  # Если произошла ошибка при чтении
+            return default_settings  # Возвращаем настройки по умолчанию
+    return default_settings  # Если файла нет, возвращаем настройки по умолчанию
 
 
+# ========== ФУНКЦИЯ СОХРАНЕНИЯ НАСТРОЕК ==========
 def save_settings(settings):
-    """Сохраняет настройки в файл"""
-    settings_to_save = settings.copy()
-    # Преобразуем цвет из кортежа в список для JSON
-    if "theme_color" in settings_to_save:
-        settings_to_save["theme_color"] = list(settings_to_save["theme_color"])
-    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(settings_to_save, f, ensure_ascii=False, indent=4)
+    """Сохраняет настройки в файл settings.json"""
+    settings_to_save = settings.copy()  # Создаем копию настроек (чтобы не изменять оригинал)
+    if "theme_color" in settings_to_save:  # Если в настройках есть цвет
+        settings_to_save["theme_color"] = list(
+            settings_to_save["theme_color"])  # Преобразуем кортеж в список (JSON не любит кортежи)
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:  # Открываем файл для записи
+        json.dump(settings_to_save, f, ensure_ascii=False, indent=4)  # Сохраняем настройки в формате JSON
 
 
-# Загружаем настройки
-settings = load_settings()
-current_theme_color = settings["theme_color"]
-current_theme_name = settings["theme_color_name"]
-saved_user = settings.get("saved_user")  # Сохраненный пользователь
+# ========== ЗАГРУЗКА НАСТРОЕК ПРИ ЗАПУСКЕ ==========
+settings = load_settings()  # Загружаем настройки из файла
+current_theme_color = settings["theme_color"]  # Текущий цвет темы
+current_theme_name = settings["theme_color_name"]  # Название текущего цвета
+saved_user = settings.get("saved_user")  # Сохраненный пользователь (или None)
 
-# Шрифты
-font = pygame.font.Font(None, 36)
-big_font = pygame.font.Font(None, 72)
-small_font = pygame.font.Font(None, 24)
+# ========== НАСТРОЙКА ШРИФТОВ ==========
+font = pygame.font.Font(None, 36)  # Основной шрифт размером 36 пикселей
+big_font = pygame.font.Font(None, 72)  # Большой шрифт размером 72 пикселя
+small_font = pygame.font.Font(None, 24)  # Маленький шрифт размером 24 пикселя
 
-# Файл для сохранения пользователей
-USERS_FILE = "users.json"
+# ========== ФАЙЛ ДЛЯ ХРАНЕНИЯ ПОЛЬЗОВАТЕЛЕЙ ==========
+USERS_FILE = "users.json"  # Имя файла для хранения данных пользователей
 
-profile_btn1 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 150, 300, 50)
-profile_btn2 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 220, 300, 50)
-profile_btn3 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 290, 300, 50)
-profile_btn4 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 360, 300, 50)
-profile_btn5 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 430, 300, 50)
-profile_btn6 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 500, 300, 50)
+# ========== КНОПКИ НА ЭКРАНЕ ПРОФИЛЯ (18 кнопок) ==========
+# Первый столбец (кнопки 1-6)
+profile_btn1 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 150, 300, 50)  # Кнопка "Калькулятор"
+profile_btn2 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 220, 300, 50)  # Кнопка "Перевод из двоичной"
+profile_btn3 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 290, 300, 50)  # Кнопка "Мои достижения"
+profile_btn4 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 360, 300, 50)  # Кнопка "Настройки профиля"
+profile_btn5 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 430, 300, 50)  # Кнопка "Помощь"
+profile_btn6 = pygame.Rect(WINDOW_WIDTH // 2 - 450, 500, 300, 50)  # Кнопка "О программе"
 
-profile_btn7 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 150, 300, 50)
-profile_btn8 = pygame.Rect(WINDOW_WIDTH // 2 -130, 220, 300, 50)
-profile_btn9 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 290, 300, 50)
-profile_btn10 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 360, 300, 50)
-profile_btn11 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 430, 300, 50)
-profile_btn12 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 500, 300, 50)
+# Второй столбец (кнопки 7-12)
+profile_btn7 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 150, 300, 50)  # "Моя статистика"
+profile_btn8 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 220, 300, 50)  # "Купить подписку"
+profile_btn9 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 290, 300, 50)  # "Мои достижения" (дубль)
+profile_btn10 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 360, 300, 50)  # "Настройки профиля" (дубль)
+profile_btn11 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 430, 300, 50)  # "Помощь" (дубль)
+profile_btn12 = pygame.Rect(WINDOW_WIDTH // 2 - 130, 500, 300, 50)  # "О программе" (дубль)
 
-profile_btn13 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 150, 300, 50)
-profile_btn14 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 220, 300, 50)
-profile_btn15 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 290, 300, 50)
-profile_btn16 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 360, 300, 50)
-profile_btn17 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 430, 300, 50)
-profile_btn18 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 500, 300, 50)
+# Третий столбец (кнопки 13-18)
+profile_btn13 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 150, 300, 50)  # "Моя статистика" (дубль)
+profile_btn14 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 220, 300, 50)  # "Купить подписку" (дубль)
+profile_btn15 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 290, 300, 50)  # "Мои достижения" (дубль)
+profile_btn16 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 360, 300, 50)  # "Настройки профиля" (дубль)
+profile_btn17 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 430, 300, 50)  # "Помощь" (дубль)
+profile_btn18 = pygame.Rect(WINDOW_WIDTH // 2 + 190, 500, 300, 50)  # "О программе" (дубль)
 
+
+# ========== ФУНКЦИИ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ ==========
 def load_users():
-    """Загружает пользователей из файла"""
-    if os.path.exists(USERS_FILE):
-        try:
-            with open(USERS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
+    """Загружает список пользователей из файла users.json"""
+    if os.path.exists(USERS_FILE):  # Проверяем существование файла
+        try:  # Пытаемся прочитать
+            with open(USERS_FILE, 'r', encoding='utf-8') as f:  # Открываем файл
+                return json.load(f)  # Возвращаем словарь пользователей
+        except:  # Если ошибка
+            return {}  # Возвращаем пустой словарь
+    return {}  # Если файла нет, возвращаем пустой словарь
 
 
 def save_users(users):
-    """Сохраняет пользователей в файл"""
-    with open(USERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users, f, ensure_ascii=False, indent=4)
+    """Сохраняет список пользователей в файл users.json"""
+    with open(USERS_FILE, 'w', encoding='utf-8') as f:  # Открываем файл для записи
+        json.dump(users, f, ensure_ascii=False, indent=4)  # Сохраняем в JSON
 
 
-# Загружаем пользователей
-users = load_users()
+# ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ==========
+users = load_users()  # Загружаем всех зарегистрированных пользователей
 
-# Загрузка иконки настроек
+
+# ========== ЗАГРУЗКА ИКОНКИ НАСТРОЕК ==========
 def load_settings_icon():
-    """Загружает иконку настроек из файла"""
-    icon_size = (50, 50)
-
-    # Пытаемся загрузить иконку из файла
-    if os.path.exists("settings_icon.png"):
-        try:
-            icon = pygame.image.load("settings_icon.png")
-            icon = pygame.transform.scale(icon, icon_size)
-            return icon
-        except:
-            pass
+    """Загружает иконку настроек из файла settings_icon.png"""
+    icon_size = (50, 50)  # Размер иконки 50x50 пикселей
+    if os.path.exists("settings_icon.png"):  # Проверяем, существует ли файл иконки
+        try:  # Пытаемся загрузить
+            icon = pygame.image.load("settings_icon.png")  # Загружаем изображение
+            icon = pygame.transform.scale(icon, icon_size)  # Изменяем размер до 50x50
+            return icon  # Возвращаем иконку
+        except:  # Если ошибка
+            pass  # Игнорируем (иконки не будет)
+    return None  # Если иконки нет, возвращаем None
 
 
 # Загружаем иконку
-settings_icon = load_settings_icon()
-settings_icon_rect = settings_icon.get_rect(topleft=(20, 20))
-
+settings_icon = load_settings_icon()  # Загружаем иконку настроек
+settings_icon_rect = settings_icon.get_rect(topleft=(20, 20))  # Прямоугольник для позиционирования (верхний левый угол)
 
 # ========== КНОПКИ В ГЛАВНОМ МЕНЮ ==========
-login_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 - 100, 300, 80)
-register_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 40, 300, 80)
+login_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 - 100, 300, 80)  # Кнопка "Вход"
+register_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 40, 300, 80)  # Кнопка "Регистрация"
 
-# Кнопки на других экранах
-back_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 100, 200, 50)
-submit_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 180, 200, 50)
-logout_btn_rect = pygame.Rect(WINDOW_WIDTH - 150, WINDOW_HEIGHT - 60, 120, 40)
-kal = pygame.Rect(250, 100, 200, 50)
+# ========== ОБЩИЕ КНОПКИ ДЛЯ РАЗНЫХ ЭКРАНОВ ==========
+back_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 100, 200, 50)  # Кнопка "Назад"
+submit_btn_rect = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 180, 200, 50)  # Кнопка подтверждения
+logout_btn_rect = pygame.Rect(WINDOW_WIDTH - 150, WINDOW_HEIGHT - 60, 120, 40)  # Кнопка "Выйти"
+kal = pygame.Rect(250, 100, 200, 50)  # (Неиспользуемая кнопка)
 
-# ========== ПОЛЯ ДЛЯ ВВОДА ==========
-login_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 - 70, 300, 50)
-password_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 40, 300, 50)
+# ========== ПОЛЯ ДЛЯ ВВОДА ЛОГИНА И ПАРОЛЯ ==========
+login_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 - 70, 300, 50)  # Поле для логина
+password_rect = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 40, 300, 50)  # Поле для пароля
 
-# ========== КНОПКИ ВЫБОРА ЦВЕТА (2 РЯДА ПО 3 КНОПКИ + 1 ПО ЦЕНТРУ) ==========
-# Размеры кнопок
-btn_width = 180
-btn_height = 50
-btn_spacing = 20
+# ========== НАСТРОЙКА КНОПОК ВЫБОРА ЦВЕТА ==========
+btn_width = 180  # Ширина каждой кнопки цвета
+btn_height = 50  # Высота каждой кнопки цвета
+btn_spacing = 20  # Расстояние между кнопками
 
-# Первый ряд (3 кнопки)
-row1_y = 200
-row1_buttons = []
-for i in range(3):
-    btn_x = WINDOW_WIDTH // 2 - (btn_width * 1.5 + btn_spacing) + i * (btn_width + btn_spacing)
-    btn_rect = pygame.Rect(btn_x, row1_y, btn_width, btn_height)
-    row1_buttons.append(btn_rect)
+# Первый ряд кнопок (3 кнопки)
+row1_y = 200  # Y-координата первого ряда
+row1_buttons = []  # Список для хранения кнопок первого ряда
+for i in range(3):  # Создаем 3 кнопки
+    btn_x = WINDOW_WIDTH // 2 - (btn_width * 1.5 + btn_spacing) + i * (btn_width + btn_spacing)  # Расчет X координаты
+    btn_rect = pygame.Rect(btn_x, row1_y, btn_width, btn_height)  # Создаем прямоугольник кнопки
+    row1_buttons.append(btn_rect)  # Добавляем в список
 
-# Второй ряд (3 кнопки)
-row2_y = row1_y + btn_height + btn_spacing
-row2_buttons = []
-for i in range(3):
-    btn_x = WINDOW_WIDTH // 2 - (btn_width * 1.5 + btn_spacing) + i * (btn_width + btn_spacing)
-    btn_rect = pygame.Rect(btn_x, row2_y, btn_width, btn_height)
-    row2_buttons.append(btn_rect)
+# Второй ряд кнопок (3 кнопки)
+row2_y = row1_y + btn_height + btn_spacing  # Y-координата второго ряда (ниже первого)
+row2_buttons = []  # Список для хранения кнопок второго ряда
+for i in range(3):  # Создаем 3 кнопки
+    btn_x = WINDOW_WIDTH // 2 - (btn_width * 1.5 + btn_spacing) + i * (btn_width + btn_spacing)  # Расчет X
+    btn_rect = pygame.Rect(btn_x, row2_y, btn_width, btn_height)  # Создаем прямоугольник
+    row2_buttons.append(btn_rect)  # Добавляем в список
 
 # Третий ряд (1 кнопка по центру)
-row3_y = row2_y + btn_height + btn_spacing
-row3_btn = pygame.Rect(WINDOW_WIDTH // 2 - btn_width // 2, row3_y, btn_width, btn_height)
+row3_y = row2_y + btn_height + btn_spacing  # Y-координата третьего ряда
+row3_btn = pygame.Rect(WINDOW_WIDTH // 2 - btn_width // 2, row3_y, btn_width, btn_height)  # Кнопка по центру
 
-# Собираем все кнопки в список с цветами
+# Список доступных цветов с названиями
 color_options = [
-    (BLUE, "Синий"),
-    (GREEN, "Зеленый"),
-    (RED, "Красный"),
-    (PURPLE, "Фиолетовый"),
-    (ORANGE, "Оранжевый"),
-    (PINK, "Розовый"),
-    (LIGHT_BLUE, "Голубой")
+    (BLUE, "Синий"),  # Синий цвет
+    (GREEN, "Зеленый"),  # Зеленый цвет
+    (RED, "Красный"),  # Красный цвет
+    (PURPLE, "Фиолетовый"),  # Фиолетовый
+    (ORANGE, "Оранжевый"),  # Оранжевый
+    (PINK, "Розовый"),  # Розовый
+    (LIGHT_BLUE, "Голубой")  # Голубой
 ]
 
-# Создаем список кнопок в порядке: 1 ряд, 2 ряд, 3 ряд
-color_buttons = []
-for i in range(3):
+# Собираем все кнопки в один список для удобства
+color_buttons = []  # Каждый элемент: (прямоугольник, цвет, название)
+for i in range(3):  # Первый ряд (первые 3 цвета)
     color_buttons.append((row1_buttons[i], color_options[i][0], color_options[i][1]))
-for i in range(3):
+for i in range(3):  # Второй ряд (следующие 3 цвета)
     color_buttons.append((row2_buttons[i], color_options[i + 3][0], color_options[i + 3][1]))
-color_buttons.append((row3_btn, color_options[6][0], color_options[6][1]))
+color_buttons.append((row3_btn, color_options[6][0], color_options[6][1]))  # Третий ряд (7-й цвет)
 
-# Состояния кнопок
-login_btn_hover = False
-register_btn_hover = False
-back_btn_hover = False
-submit_btn_hover = False
-logout_btn_hover = False
-settings_icon_hover = False
-kal = False
-color_buttons_hover = [False] * len(color_buttons)
-profile_btn_hover = [False] * 18
-# Текущий экран
-if saved_user and saved_user in users:
-    current_screen = "profile"
-    current_user = saved_user
-else:
-    current_screen = "menu"
-    current_user = None
+# ========== СОСТОЯНИЯ КНОПОК (наведение и т.д.) ==========
+login_btn_hover = False  # Состояние наведения на кнопку "Вход"
+register_btn_hover = False  # Состояние наведения на кнопку "Регистрация"
+back_btn_hover = False  # Состояние наведения на кнопку "Назад"
+submit_btn_hover = False  # Состояние наведения на кнопку подтверждения
+logout_btn_hover = False  # Состояние наведения на кнопку "Выйти"
+settings_icon_hover = False  # Состояние наведения на иконку настроек
+kal = False  # (Не используется)
+color_buttons_hover = [False] * len(color_buttons)  # Список состояний наведения для кнопок цвета
+profile_btn_hover = [False] * 18  # Список состояний для 18 кнопок профиля
 
-# Поля для ввода
-login_active = False
-login_text = ""
+# ========== ТЕКУЩИЙ ЭКРАН И ПОЛЬЗОВАТЕЛЬ ==========
+# Определяем, какой экран показывать при запуске
+if saved_user and saved_user in users:  # Если есть сохраненный пользователь и он существует
+    current_screen = "profile"  # Сразу показываем профиль
+    current_user = saved_user  # Устанавливаем текущего пользователя
+else:  # Если нет сохраненного пользователя
+    current_screen = "menu"  # Показываем главное меню
+    current_user = None  # Пользователь не авторизован
 
-password_active = False
-password_text = ""
+# ========== СОСТОЯНИЯ ПОЛЕЙ ВВОДА ==========
+login_active = False  # Активно ли поле ввода логина (для курсора)
+login_text = ""  # Текст, введенный в поле логина
+
+password_active = False  # Активно ли поле ввода пароля
+password_text = ""  # Текст, введенный в поле пароля
 
 
+# ========== ФУНКЦИЯ ОТРИСОВКИ ИКОНКИ НАСТРОЕК ==========
 def draw_settings_icon():
-    """Рисует иконку настроек с эффектом наведения"""
-    if settings_icon_hover:
-        scaled_icon = pygame.transform.scale(settings_icon, (55, 55))
-        icon_x = settings_icon_rect.x - 2.5
-        icon_y = settings_icon_rect.y - 2.5
-        WINDOW.blit(scaled_icon, (icon_x, icon_y))
+    """Рисует иконку настроек с эффектом увеличения при наведении"""
+    if settings_icon_hover:  # Если мышь наведена на иконку
+        scaled_icon = pygame.transform.scale(settings_icon, (55, 55))  # Увеличиваем иконку до 55x55
+        icon_x = settings_icon_rect.x - 2.5  # Смещаем по X для центрирования
+        icon_y = settings_icon_rect.y - 2.5  # Смещаем по Y для центрирования
+        WINDOW.blit(scaled_icon, (icon_x, icon_y))  # Рисуем увеличенную иконку
+        # Рисуем подсветку (круг вокруг иконки)
         pygame.draw.circle(WINDOW, (255, 255, 200, 100),
                            (settings_icon_rect.centerx, settings_icon_rect.centery), 30, 2)
-    else:
-        WINDOW.blit(settings_icon, settings_icon_rect)
+    else:  # Если мышь не наведена
+        WINDOW.blit(settings_icon, settings_icon_rect)  # Рисуем обычную иконку
 
 
+# ========== ФУНКЦИЯ ОТРИСОВКИ КНОПКИ ==========
 def draw_button(rect, text, is_hovered, normal_color, hover_color):
-    """Функция для отрисовки кнопки"""
-    if is_hovered:
-        color = hover_color
-    else:
-        color = normal_color
+    """Универсальная функция для рисования кнопки"""
+    if is_hovered:  # Если мышь наведена
+        color = hover_color  # Используем цвет наведения
+    else:  # Если не наведена
+        color = normal_color  # Используем обычный цвет
 
-    pygame.draw.rect(WINDOW, color, rect)
-    pygame.draw.rect(WINDOW, BLACK, rect, 2)
+    pygame.draw.rect(WINDOW, color, rect)  # Рисуем заливку кнопки
+    pygame.draw.rect(WINDOW, BLACK, rect, 2)  # Рисуем черную рамку толщиной 2 пикселя
 
-    text_surface = font.render(text, True, BLACK)
-    text_rect = text_surface.get_rect(center=rect.center)
-    WINDOW.blit(text_surface, text_rect)
+    text_surface = font.render(text, True, BLACK)  # Создаем текст черного цвета
+    text_rect = text_surface.get_rect(center=rect.center)  # Центрируем текст на кнопке
+    WINDOW.blit(text_surface, text_rect)  # Рисуем текст
 
 
+# ========== ФУНКЦИЯ ОТРИСОВКИ ПОЛЯ ВВОДА ==========
 def draw_input_field(rect, text, is_active, label, show_stars=False):
-    """Рисует поле для ввода текста"""
-    label_surface = font.render(label, True, BLACK)
-    WINDOW.blit(label_surface, (rect.x, rect.y - 30))
+    """Рисует поле для ввода текста с меткой и курсором"""
+    label_surface = font.render(label, True, BLACK)  # Создаем текст метки
+    WINDOW.blit(label_surface, (rect.x, rect.y - 30))  # Рисуем метку над полем
 
-    if is_active:
-        color = current_theme_color
-    else:
-        color = GRAY
+    if is_active:  # Если поле активно (пользователь вводит)
+        color = current_theme_color  # Подсвечиваем цветом темы
+    else:  # Если не активно
+        color = GRAY  # Серый цвет
 
-    pygame.draw.rect(WINDOW, color, rect)
-    pygame.draw.rect(WINDOW, BLACK, rect, 2)
+    pygame.draw.rect(WINDOW, color, rect)  # Рисуем фон поля
+    pygame.draw.rect(WINDOW, BLACK, rect, 2)  # Рисуем рамку
 
-    if show_stars:
-        display_text = "*" * len(text)
-    else:
-        display_text = text
+    if show_stars:  # Если нужно скрыть пароль (показывать звездочки)
+        display_text = "*" * len(text)  # Заменяем каждый символ на звездочку
+    else:  # Если обычный текст
+        display_text = text  # Показываем как есть
 
-    text_surface = font.render(display_text, True, BLACK)
-    WINDOW.blit(text_surface, (rect.x + 10, rect.y + 10))
+    text_surface = font.render(display_text, True, BLACK)  # Создаем текст
+    WINDOW.blit(text_surface, (rect.x + 10, rect.y + 10))  # Рисуем с отступом 10 пикселей
 
-    if is_active and pygame.time.get_ticks() % 1000 < 500:
-        cursor_x = rect.x + 10 + text_surface.get_width()
-        cursor_y = rect.y + 10
-        pygame.draw.line(WINDOW, BLACK, (cursor_x, cursor_y), (cursor_x, cursor_y + 30), 2)
+    # Рисуем мигающий курсор
+    if is_active and pygame.time.get_ticks() % 1000 < 500:  # Мигает каждые 500 мс
+        cursor_x = rect.x + 10 + text_surface.get_width()  # X позиция курсора (после текста)
+        cursor_y = rect.y + 10  # Y позиция курсора
+        pygame.draw.line(WINDOW, BLACK, (cursor_x, cursor_y), (cursor_x, cursor_y + 30), 2)  # Рисуем вертикальную линию
 
 
+# ========== ЭКРАН ГЛАВНОГО МЕНЮ ==========
 def draw_menu():
-    """Рисует главное меню"""
-    WINDOW.fill(WHITE)
-    title_text = big_font.render("ДОБРО ПОЖАЛОВАТЬ", True, BLACK)
-    title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 150))
-    WINDOW.blit(title_text, title_rect)
+    """Рисует главное меню с кнопками входа и регистрации"""
+    WINDOW.fill(WHITE)  # Заливаем фон белым цветом
+    title_text = big_font.render("ДОБРО ПОЖАЛОВАТЬ", True, BLACK)  # Заголовок
+    title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 150))  # Центрируем заголовок
+    WINDOW.blit(title_text, title_rect)  # Рисуем заголовок
 
+    # Рисуем кнопки входа и регистрации
     draw_button(login_btn_rect, "ВХОД", login_btn_hover, current_theme_color, DARK_BLUE)
     draw_button(register_btn_rect, "РЕГИСТРАЦИЯ", register_btn_hover, current_theme_color, DARK_BLUE)
 
-    users_count = len(users)
-    info_text = small_font.render(f"Всего пользователей: {users_count}", True, BLACK)
-    info_rect = info_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
-    WINDOW.blit(info_text, info_rect)
+    users_count = len(users)  # Количество зарегистрированных пользователей
+    info_text = small_font.render(f"Всего пользователей: {users_count}", True, BLACK)  # Текст статистики
+    info_rect = info_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))  # Внизу экрана
+    WINDOW.blit(info_text, info_rect)  # Рисуем статистику
 
-    draw_settings_icon()
+    draw_settings_icon()  # Рисуем иконку настроек
 
 
+# ========== ЭКРАН ВХОДА ==========
 def draw_login_screen():
-    """Рисует экран входа"""
-    WINDOW.fill(WHITE)
-    title_text = big_font.render("ВХОД", True, BLACK)
-    title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
-    WINDOW.blit(title_text, title_rect)
+    """Рисует экран входа с полями логина и пароля"""
+    WINDOW.fill(WHITE)  # Белый фон
+    title_text = big_font.render("ВХОД", True, BLACK)  # Заголовок
+    title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))  # Центрируем
+    WINDOW.blit(title_text, title_rect)  # Рисуем заголовок
 
+    # Поля ввода
     draw_input_field(login_rect, login_text, login_active, "Логин:", False)
     draw_input_field(password_rect, password_text, password_active, "Пароль:", True)
 
+    # Кнопки
     draw_button(submit_btn_rect, "ВОЙТИ", submit_btn_hover, current_theme_color, DARK_BLUE)
     draw_button(back_btn_rect, "НАЗАД", back_btn_hover, RED, DARK_RED)
 
-    draw_settings_icon()
+    draw_settings_icon()  # Иконка настроек
 
 
+# ========== ЭКРАН РЕГИСТРАЦИИ ==========
 def draw_register_screen():
-    """Рисует экран регистрации"""
-    WINDOW.fill(WHITE)
-    title_text = big_font.render("РЕГИСТРАЦИЯ", True, BLACK)
+    """Рисует экран регистрации нового пользователя"""
+    WINDOW.fill(WHITE)  # Белый фон
+    title_text = big_font.render("РЕГИСТРАЦИЯ", True, BLACK)  # Заголовок
     title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
     WINDOW.blit(title_text, title_rect)
 
+    # Поля ввода (с подсказками)
     draw_input_field(login_rect, login_text, login_active, "Придумайте логин:", False)
     draw_input_field(password_rect, password_text, password_active, "Придумайте пароль:", True)
 
+    # Кнопки
     draw_button(submit_btn_rect, "ЗАРЕГИСТРИРОВАТЬСЯ", submit_btn_hover, current_theme_color, DARK_BLUE)
     draw_button(back_btn_rect, "НАЗАД", back_btn_hover, RED, DARK_RED)
 
     draw_settings_icon()
 
 
+# ========== ЭКРАН ПРОФИЛЯ ==========
 def draw_profile_screen():
-    """Рисует экран профиля с множеством кнопок"""
-    WINDOW.fill(current_theme_color)
+    """Рисует экран профиля пользователя с 18 кнопками"""
+    WINDOW.fill(current_theme_color)  # Заливаем фон цветом темы
 
-    # Приветствие
+    # Приветствие пользователя
     welcome_text = small_font.render(f"Привет, {current_user}!", True, BLACK)
     welcome_rect = welcome_text.get_rect(center=(WINDOW_WIDTH // 2, 60))
     WINDOW.blit(welcome_text, welcome_rect)
 
-    # Кнопки профиля
+    # Список всех кнопок профиля с их текстом
     buttons = [
         (profile_btn1, "Калькулятор", profile_btn_hover[0]),
-        (profile_btn2, "Перевод из двоичной в деситичную", profile_btn_hover[1]),
-        (profile_btn3, "МОИ ДОСТИЖЕНИЯ", profile_btn_hover[2]),
-        (profile_btn4, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[3]),
-        (profile_btn5, "ПОМОЩЬ", profile_btn_hover[4]),
-        (profile_btn6, "О ПРОГРАММЕ", profile_btn_hover[5]),
-        (profile_btn7, "МОЯ СТАТИСТИКА", profile_btn_hover[6]),
-        (profile_btn8, "КУПИТЬ ПОДПИСКУ", profile_btn_hover[7]),
-        (profile_btn9, "МОИ ДОСТИЖЕНИЯ", profile_btn_hover[8]),
-        (profile_btn10, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[9]),
-        (profile_btn11, "ПОМОЩЬ", profile_btn_hover[10]),
-        (profile_btn12, "О ПРОГРАММЕ", profile_btn_hover[11]),
-        (profile_btn13, "МОЯ СТАТИСТИКА", profile_btn_hover[12]),
-        (profile_btn14, "КУПИТЬ ПОДПИСКУ", profile_btn_hover[13]),
-        (profile_btn15, "МОИ ДОСТИЖЕНИЯ", profile_btn_hover[14]),
-        (profile_btn16, "НАСТРОЙКИ ПРОФИЛЯ", profile_btn_hover[15]),
-        (profile_btn17, "ПОМОЩЬ", profile_btn_hover[16]),
-        (profile_btn18, "О ПРОГРАММЕ", profile_btn_hover[17]),
+        (profile_btn2, "Перевод из двоичной в десятичную", profile_btn_hover[1]),
+        (profile_btn3, "", profile_btn_hover[2]),
+        (profile_btn4, "", profile_btn_hover[3]),
+        (profile_btn5, "", profile_btn_hover[4]),
+        (profile_btn6, "", profile_btn_hover[5]),
+        (profile_btn7, "", profile_btn_hover[6]),
+        (profile_btn8, "", profile_btn_hover[7]),
+        (profile_btn9, "", profile_btn_hover[8]),
+        (profile_btn10, "", profile_btn_hover[9]),
+        (profile_btn11, "", profile_btn_hover[10]),
+        (profile_btn12, "", profile_btn_hover[11]),
+        (profile_btn13, "", profile_btn_hover[12]),
+        (profile_btn14, "", profile_btn_hover[13]),
+        (profile_btn15, "", profile_btn_hover[14]),
+        (profile_btn16, "", profile_btn_hover[15]),
+        (profile_btn17, "", profile_btn_hover[16]),
+        (profile_btn18, "", profile_btn_hover[17]),
     ]
 
+    # Рисуем каждую кнопку
     for btn_rect, btn_text, is_hover in buttons:
         draw_button(btn_rect, btn_text, is_hover, current_theme_color, DARK_BLUE)
 
     # Кнопка выхода (внизу справа)
     draw_button(logout_btn_rect, "ВЫЙТИ", logout_btn_hover, RED, DARK_RED)
 
-    # Иконка настроек
-    draw_settings_icon()
+    draw_settings_icon()  # Иконка настроек
 
 
+# ========== ЭКРАН НАСТРОЕК ЦВЕТА ==========
 def draw_settings_screen():
-    """Рисует экран настроек для выбора цвета с кнопками в 2 ряда по 3 + 1 по центру"""
-    WINDOW.fill(WHITE)
+    """Рисует экран выбора цвета темы (7 цветов в 3 ряда)"""
+    WINDOW.fill(WHITE)  # Белый фон
 
     title_text = big_font.render("НАСТРОЙКИ ЦВЕТА", True, BLACK)
     title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
@@ -385,19 +415,19 @@ def draw_settings_screen():
 
     # Рисуем кнопки выбора цвета
     for i, (btn_rect, color, name) in enumerate(color_buttons):
-        is_hovered = color_buttons_hover[i]
+        is_hovered = color_buttons_hover[i]  # Проверяем наведение
 
-        if is_hovered:
+        if is_hovered:  # При наведении показываем цвет кнопки
             pygame.draw.rect(WINDOW, color, btn_rect)
-        else:
+        else:  # Иначе серый цвет
             pygame.draw.rect(WINDOW, GRAY, btn_rect)
-        pygame.draw.rect(WINDOW, BLACK, btn_rect, 2)
+        pygame.draw.rect(WINDOW, BLACK, btn_rect, 2)  # Рамка
 
-        text_surface = font.render(name, True, BLACK)
+        text_surface = font.render(name, True, BLACK)  # Название цвета
         text_rect = text_surface.get_rect(center=btn_rect.center)
         WINDOW.blit(text_surface, text_rect)
 
-        # Отметка, если цвет выбран
+        # Отметка (зеленый кружок), если этот цвет выбран
         if color == current_theme_color:
             pygame.draw.circle(WINDOW, GREEN, (btn_rect.right - 25, btn_rect.centery), 10)
             pygame.draw.circle(WINDOW, BLACK, (btn_rect.right - 25, btn_rect.centery), 10, 2)
@@ -406,49 +436,188 @@ def draw_settings_screen():
     back_btn_rect_settings = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 100, 200, 50)
     draw_button(back_btn_rect_settings, "НАЗАД", back_btn_hover, RED, DARK_RED)
 
-    draw_settings_icon()
+    draw_settings_icon()  # Иконка настроек
 
-    return back_btn_rect_settings
+    return back_btn_rect_settings  # Возвращаем прямоугольник кнопки для обработки кликов
 
 
+# ========== ФУНКЦИЯ ПОКАЗА СООБЩЕНИЙ ==========
 def show_message(msg, is_error=True):
-    """Показывает сообщение на экране"""
-    if is_error:
-        color = RED
-    else:
-        color = GREEN
+    """Показывает всплывающее сообщение на 1.5 секунды"""
+    if is_error:  # Если сообщение об ошибке
+        color = RED  # Красный цвет
+    else:  # Если успех
+        color = GREEN  # Зеленый цвет
 
-    text_surface = font.render(msg, True, color)
-    text_rect = text_surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
+    text_surface = font.render(msg, True, color)  # Создаем текст
+    text_rect = text_surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))  # Внизу экрана
 
+    # Рисуем фон сообщения
     pygame.draw.rect(WINDOW, WHITE, (text_rect.x - 10, text_rect.y - 5,
                                      text_rect.width + 20, text_rect.height + 10))
     pygame.draw.rect(WINDOW, color, (text_rect.x - 10, text_rect.y - 5,
-                                     text_rect.width + 20, text_rect.height + 10), 2)
-    WINDOW.blit(text_surface, text_rect)
-    pygame.display.flip()
-    pygame.time.wait(1500)
+                                     text_rect.width + 20, text_rect.height + 10), 2)  # Рамка
+    WINDOW.blit(text_surface, text_rect)  # Рисуем текст
+    pygame.display.flip()  # Обновляем экран
+    pygame.time.wait(1500)  # Ждем 1.5 секунды
 
 
-# Главный цикл
-clock = pygame.time.Clock()
-running = True
+def a1():
+    """Экран калькулятора с отдельным игровым циклом"""
+    expression = ""
+    result = ""
 
-while running:
-    mouse_pos = pygame.mouse.get_pos()
+    btn_width = 100
+    btn_height = 70
+    start_x = 30
+    start_y = 180
 
-    # Обновление состояния наведения для иконки настроек
-    settings_icon_hover = settings_icon_rect.collidepoint(mouse_pos)
+    calc_buttons = [
+        ('7', start_x, start_y), ('8', start_x + btn_width + 10, start_y),
+        ('9', start_x + (btn_width + 10) * 2, start_y), ('/', start_x + (btn_width + 10) * 3, start_y),
+        ('4', start_x, start_y + btn_height + 10), ('5', start_x + btn_width + 10, start_y + btn_height + 10),
+        ('6', start_x + (btn_width + 10) * 2, start_y + btn_height + 10),
+        ('*', start_x + (btn_width + 10) * 3, start_y + btn_height + 10),
+        ('1', start_x, start_y + (btn_height + 10) * 2),
+        ('2', start_x + btn_width + 10, start_y + (btn_height + 10) * 2),
+        ('3', start_x + (btn_width + 10) * 2, start_y + (btn_height + 10) * 2),
+        ('-', start_x + (btn_width + 10) * 3, start_y + (btn_height + 10) * 2),
+        ('0', start_x, start_y + (btn_height + 10) * 3),
+        ('.', start_x + btn_width + 10, start_y + (btn_height + 10) * 3),
+        ('=', start_x + (btn_width + 10) * 2, start_y + (btn_height + 10) * 3),
+        ('+', start_x + (btn_width + 10) * 3, start_y + (btn_height + 10) * 3),
+        ('C', start_x, start_y + (btn_height + 10) * 4),
+        ('⌫', start_x + btn_width + 10, start_y + (btn_height + 10) * 4)
+    ]
 
-    # Обновление состояний наведения в зависимости от экрана
-    if current_screen == "menu":
+    def draw_calc_buttons():
+        for btn in calc_buttons:
+            text, x, y = btn
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if x < mouse_x < x + btn_width and y < mouse_y < y + btn_height:
+                color = DARK_BLUE  # Цвет при наведении
+            else:
+                color = current_theme_color  # Цвет темы для кнопок
+            pygame.draw.rect(WINDOW, color, (x, y, btn_width, btn_height))
+            pygame.draw.rect(WINDOW, BLACK, (x, y, btn_width, btn_height), 3)
+            btn_font = pygame.font.Font(None, 42)
+            text_surface = btn_font.render(text, True, BLACK)
+            text_rect = text_surface.get_rect(center=(x + btn_width // 2, y + btn_height // 2))
+            WINDOW.blit(text_surface, text_rect)
+
+    def draw_calc_display():
+        display_rect = pygame.Rect(20, 100, WINDOW_WIDTH - 40, 70)
+        # Создаём светлый оттенок текущего цвета темы
+        light_theme = tuple(min(c + 100, 255) for c in current_theme_color)
+        pygame.draw.rect(WINDOW, light_theme, display_rect)
+        pygame.draw.rect(WINDOW, BLACK, display_rect, 3)
+        expr_surface = big_font.render(expression, True, BLACK)
+        expr_rect = expr_surface.get_rect(right=WINDOW_WIDTH - 30, centery=display_rect.centery)
+        WINDOW.blit(expr_surface, expr_rect)
+
+    def evaluate_expression(expr):
+        try:
+            allowed_chars = set("0123456789+-*/.()")
+            if all(c in allowed_chars for c in expr):
+                return str(eval(expr))
+            else:
+                return "Ошибка"
+        except:
+            return "Ошибка"
+
+    back_btn = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 70, 200, 50)
+
+    running_calc = True
+    while running_calc:
+        WINDOW.fill(WHITE)
+
+        title_text = big_font.render("КАЛЬКУЛЯТОР", True, BLACK)
+        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 50))
+        WINDOW.blit(title_text, title_rect)
+
+        draw_calc_display()
+        draw_calc_buttons()
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        back_hover = back_btn.collidepoint(mouse_x, mouse_y)
+        draw_button(back_btn, "ВЫЙТИ", back_hover, RED, DARK_RED)
+        draw_settings_icon()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running_calc = False
+                return False
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Проверка кнопки выхода
+                if back_btn.collidepoint(event.pos):
+                    return True  # <--- ВАЖНО: возвращаем True, чтобы выйти из калькулятора
+
+                for btn in calc_buttons:
+                    text, x, y = btn
+                    if x < event.pos[0] < x + btn_width and y < event.pos[1] < y + btn_height:
+                        if text == 'C':
+                            expression = ""
+                            result = ""
+                        elif text == '⌫':
+                            expression = expression[:-1]
+                        elif text == '=':
+                            result = evaluate_expression(expression)
+                            expression = result
+                        else:
+                            expression += text
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return True  # <--- ВАЖНО: ESC тоже возвращает в профиль
+                elif event.key == pygame.K_RETURN:
+                    result = evaluate_expression(expression)
+                    expression = result
+                elif event.key == pygame.K_BACKSPACE:
+                    expression = expression[:-1]
+                else:
+                    char = event.unicode
+                    if char in "0123456789+-*/.()":
+                        expression += char
+
+        pygame.display.flip()
+        clock.tick(60)
+
+    return True
+
+
+# ========== ГЛАВНЫЙ ИГРОВОЙ ЦИКЛ ==========
+clock = pygame.time.Clock()  # Создаем объект Clock для управления FPS
+running = True  # Флаг работы главного цикла
+
+while running:  # Бесконечный цикл, пока running = True
+    mouse_pos = pygame.mouse.get_pos()  # Получаем текущую позицию мыши
+
+    # ========== ОБНОВЛЕНИЕ СОСТОЯНИЙ НАВЕДЕНИЯ ==========
+    settings_icon_hover = settings_icon_rect.collidepoint(mouse_pos)  # Проверка наведения на иконку настроек
+
+    # В зависимости от текущего экрана обновляем состояния кнопок
+    if current_screen == "menu":  # Главное меню
         login_btn_hover = login_btn_rect.collidepoint(mouse_pos)
         register_btn_hover = register_btn_rect.collidepoint(mouse_pos)
+        # Сбрасываем остальные кнопки
         back_btn_hover = False
         submit_btn_hover = False
         logout_btn_hover = False
 
-    elif current_screen == "login":
+    elif current_screen == "login":  # Экран входа
+        login_btn_hover = False
+        register_btn_hover = False
+        back_btn_hover = back_btn_rect.collidepoint(mouse_pos)
+        submit_btn_hover = submit_btn_rect.collidepoint(mouse_pos)
+        logout_btn_hover = False
+
+        # Если активны поля ввода, отключаем наведение на кнопки
+        if login_active or password_active:
+            submit_btn_hover = False
+            back_btn_hover = False
+
+    elif current_screen == "register":  # Экран регистрации
         login_btn_hover = False
         register_btn_hover = False
         back_btn_hover = back_btn_rect.collidepoint(mouse_pos)
@@ -459,25 +628,14 @@ while running:
             submit_btn_hover = False
             back_btn_hover = False
 
-    elif current_screen == "register":
-        login_btn_hover = False
-        register_btn_hover = False
-        back_btn_hover = back_btn_rect.collidepoint(mouse_pos)
-        submit_btn_hover = submit_btn_rect.collidepoint(mouse_pos)
-        logout_btn_hover = False
-
-        if login_active or password_active:
-            submit_btn_hover = False
-            back_btn_hover = False
-
-
-    elif current_screen == "profile":
+    elif current_screen == "profile":  # Экран профиля
         login_btn_hover = False
         register_btn_hover = False
         back_btn_hover = False
         submit_btn_hover = False
         logout_btn_hover = logout_btn_rect.collidepoint(mouse_pos)
-        # Обновляем наведение для всех кнопок профиля
+
+        # Обновляем наведение для всех 18 кнопок профиля
         profile_btn_hover[0] = profile_btn1.collidepoint(mouse_pos)
         profile_btn_hover[1] = profile_btn2.collidepoint(mouse_pos)
         profile_btn_hover[2] = profile_btn3.collidepoint(mouse_pos)
@@ -497,154 +655,164 @@ while running:
         profile_btn_hover[16] = profile_btn17.collidepoint(mouse_pos)
         profile_btn_hover[17] = profile_btn18.collidepoint(mouse_pos)
 
-    elif current_screen == "settings":
+    elif current_screen == "settings":  # Экран настроек
         login_btn_hover = False
         register_btn_hover = False
         back_btn_hover = False
         submit_btn_hover = False
         logout_btn_hover = False
 
-        # Обновляем наведение для кнопок цвета
+        # Обновляем наведение для кнопок выбора цвета
         for i, (btn_rect, _, _) in enumerate(color_buttons):
             color_buttons_hover[i] = btn_rect.collidepoint(mouse_pos)
 
-    # Обработка событий
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            if current_user:
-                settings["saved_user"] = current_user
-                save_settings(settings)
-            running = False
+    # ========== ОБРАБОТКА СОБЫТИЙ ==========
+    for event in pygame.event.get():  # Перебираем все события
+        if event.type == pygame.QUIT:  # Если нажали крестик
+            if current_user:  # Если пользователь авторизован
+                settings["saved_user"] = current_user  # Сохраняем его для автовхода
+                save_settings(settings)  # Сохраняем настройки
+            running = False  # Завершаем главный цикл
 
+        # ========== ОБРАБОТКА КЛИКОВ МЫШИ ==========
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
+            if event.button == 1:  # Левая кнопка мыши
+
+                # Иконка настроек (работает с любого экрана)
                 if settings_icon_rect.collidepoint(event.pos):
-                    current_screen = "settings"
+                    current_screen = "settings"  # Переход к настройкам
 
+                # Обработка кликов в зависимости от экрана
                 elif current_screen == "menu":
-                    if login_btn_rect.collidepoint(event.pos):
-                        login_text = ""
+                    if login_btn_rect.collidepoint(event.pos):  # Кнопка "Вход"
+                        login_text = ""  # Очищаем поля
                         password_text = ""
                         login_active = False
                         password_active = False
-                        current_screen = "login"
+                        current_screen = "login"  # Переходим на экран входа
 
-                    elif register_btn_rect.collidepoint(event.pos):
+                    elif register_btn_rect.collidepoint(event.pos):  # Кнопка "Регистрация"
                         login_text = ""
                         password_text = ""
                         login_active = False
                         password_active = False
-                        current_screen = "register"
+                        current_screen = "register"  # Переходим на экран регистрации
 
                 elif current_screen == "settings":
-                    # Проверяем клик по кнопкам цвета
+                    # Проверяем клик по кнопкам выбора цвета
                     for i, (btn_rect, color, name) in enumerate(color_buttons):
                         if btn_rect.collidepoint(event.pos):
-                            current_theme_color = color
+                            current_theme_color = color  # Меняем цвет темы
                             current_theme_name = name
-                            settings["theme_color"] = current_theme_color
+                            settings["theme_color"] = current_theme_color  # Сохраняем
                             settings["theme_color_name"] = current_theme_name
                             if current_user:
                                 settings["saved_user"] = current_user
-                            save_settings(settings)
-                            show_message(f"Цвет изменен на {name}!", False)
+                            save_settings(settings)  # Сохраняем настройки в файл
+                            show_message(f"Цвет изменен на {name}!", False)  # Показываем сообщение
+                            # Возвращаемся на предыдущий экран
                             if current_user:
                                 current_screen = "profile"
                             else:
                                 current_screen = "menu"
-                            break
+                            break  # Выходим из цикла, чтобы не обрабатывать другие кнопки
 
-                    # Проверяем клик по кнопке назад
+                    # Проверяем клик по кнопке "Назад" в настройках
                     back_btn_rect_settings = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 100, 200, 50)
                     if back_btn_rect_settings.collidepoint(event.pos):
                         if current_user:
-                            current_screen = "profile"
+                            current_screen = "profile"  # Возврат в профиль
                         else:
-                            current_screen = "menu"
+                            current_screen = "menu"  # Возврат в меню
 
                 elif current_screen in ["login", "register"]:
+                    # Активация полей ввода при клике на них
                     login_active = login_rect.collidepoint(event.pos)
                     password_active = password_rect.collidepoint(event.pos)
 
                     if current_screen == "login":
+                        # Обработка кнопки "ВОЙТИ"
                         if submit_btn_rect.collidepoint(event.pos) and not (login_active or password_active):
-                            if login_text and password_text:
-                                if login_text in users and users[login_text] == password_text:
-                                    current_user = login_text
-                                    settings["saved_user"] = current_user
+                            if login_text and password_text:  # Проверяем, что поля заполнены
+                                if login_text in users and users[
+                                    login_text] == password_text:  # Проверка логина и пароля
+                                    current_user = login_text  # Авторизуем пользователя
+                                    settings["saved_user"] = current_user  # Сохраняем для автовхода
                                     save_settings(settings)
                                     show_message(f"Добро пожаловать, {login_text}!", False)
-                                    login_text = ""
+                                    login_text = ""  # Очищаем поля
                                     password_text = ""
-                                    current_screen = "profile"
+                                    current_screen = "profile"  # Переход в профиль
                                 else:
-                                    show_message("Неверный логин или пароль!", True)
+                                    show_message("Неверный логин или пароль!", True)  # Ошибка
                             else:
-                                show_message("Заполните все поля!", True)
+                                show_message("Заполните все поля!", True)  # Ошибка
 
+                        # Кнопка "НАЗАД"
                         elif back_btn_rect.collidepoint(event.pos) and not (login_active or password_active):
                             login_text = ""
                             password_text = ""
-                            current_screen = "menu"
+                            current_screen = "menu"  # Возврат в меню
 
                     elif current_screen == "register":
+                        # Обработка кнопки "ЗАРЕГИСТРИРОВАТЬСЯ"
                         if submit_btn_rect.collidepoint(event.pos) and not (login_active or password_active):
                             if login_text and password_text:
-                                if login_text in users:
+                                if login_text in users:  # Проверка существования пользователя
                                     show_message("Пользователь уже существует!", True)
-                                elif len(login_text) < 3:
+                                elif len(login_text) < 3:  # Проверка длины логина
                                     show_message("Логин должен содержать минимум 3 символа!", True)
-                                elif len(password_text) < 4:
+                                elif len(password_text) < 4:  # Проверка длины пароля
                                     show_message("Пароль должен содержать минимум 4 символа!", True)
                                 else:
-                                    users[login_text] = password_text
-                                    save_users(users)
-                                    current_user = login_text
+                                    users[login_text] = password_text  # Сохраняем нового пользователя
+                                    save_users(users)  # Сохраняем в файл
+                                    current_user = login_text  # Автоматически входим
                                     settings["saved_user"] = current_user
                                     save_settings(settings)
                                     show_message(f"Пользователь {login_text} зарегистрирован!", False)
                                     login_text = ""
                                     password_text = ""
-                                    current_screen = "profile"
+                                    current_screen = "profile"  # Переход в профиль
                             else:
                                 show_message("Заполните все поля!", True)
 
+                        # Кнопка "НАЗАД"
                         elif back_btn_rect.collidepoint(event.pos) and not (login_active or password_active):
                             login_text = ""
                             password_text = ""
                             current_screen = "menu"
 
                 elif current_screen == "profile":
+                    # Кнопка выхода из профиля
                     if logout_btn_rect.collidepoint(event.pos):
-                        current_user = None
-                        settings["saved_user"] = None
+                        current_user = None  # Сбрасываем пользователя
+                        settings["saved_user"] = None  # Убираем автовход
                         save_settings(settings)
-                        current_screen = "menu"
+                        current_screen = "menu"  # Возврат в меню
 
-                    elif profile_btn1.collidepoint(event.pos):
-                        current_screen == "seting"
-
-                    elif profile_btn2.collidepoint(event.pos):
-                        show_message("Подписка - 500 руб/мес", False)
-
-                    elif profile_btn3.collidepoint(event.pos):
+                    # Обработка кнопок профиля
+                    elif profile_btn1.collidepoint(event.pos):  # Кнопка "Калькулятор"
+                        current_screen = "a1"  # Переход на экран калькулятора
+                    elif profile_btn2.collidepoint(event.pos):  # Перевод из двоичной
+                        show_message("Подписка - 500 руб/мес", False)  # Временное сообщение
+                    elif profile_btn3.collidepoint(event.pos):  # Мои достижения
                         show_message("Ваши достижения: Новичок", False)
-
-                    elif profile_btn4.collidepoint(event.pos):
-                        current_screen = "profile_settings"  # Можно создать новый экран
-
-                    elif profile_btn5.collidepoint(event.pos):
+                    elif profile_btn4.collidepoint(event.pos):  # Настройки профиля
+                        current_screen = "profile_settings"  # (экран пока не создан)
+                    elif profile_btn5.collidepoint(event.pos):  # Помощь
                         show_message("Напишите на support@example.com", False)
-
-                    elif profile_btn6.collidepoint(event.pos):
+                    elif profile_btn6.collidepoint(event.pos):  # О программе
                         show_message("Версия 1.0.0", False)
 
+        # ========== ОБРАБОТКА НАЖАТИЙ КЛАВИШ ==========
         if event.type == pygame.KEYDOWN and current_screen in ["login", "register"]:
-            if event.key == pygame.K_RETURN:
+            if event.key == pygame.K_RETURN:  # Enter - подтверждение
                 login_active = False
                 password_active = False
 
                 if current_screen == "login":
+                    # Та же логика, что и при клике на кнопку "ВОЙТИ"
                     if login_text and password_text:
                         if login_text in users and users[login_text] == password_text:
                             current_user = login_text
@@ -660,6 +828,7 @@ while running:
                         show_message("Заполните все поля!", True)
 
                 elif current_screen == "register":
+                    # Та же логика, что и при клике на кнопку регистрации
                     if login_text and password_text:
                         if login_text in users:
                             show_message("Пользователь уже существует!", True)
@@ -680,7 +849,7 @@ while running:
                     else:
                         show_message("Заполните все поля!", True)
 
-            elif event.key == pygame.K_TAB:
+            elif event.key == pygame.K_TAB:  # Tab - переключение между полями
                 if login_active:
                     login_active = False
                     password_active = True
@@ -688,35 +857,38 @@ while running:
                     password_active = False
                     login_active = True
 
-            elif login_active:
-                if event.key == pygame.K_BACKSPACE:
+            elif login_active:  # Если активно поле логина
+                if event.key == pygame.K_BACKSPACE:  # Backspace - удалить символ
                     login_text = login_text[:-1]
-                else:
-                    if len(login_text) < 20 and event.unicode.isprintable():
+                else:  # Добавляем символ
+                    if len(login_text) < 20 and event.unicode.isprintable():  # Ограничение 20 символов
                         login_text += event.unicode
 
-            elif password_active:
+            elif password_active:  # Если активно поле пароля
                 if event.key == pygame.K_BACKSPACE:
                     password_text = password_text[:-1]
                 else:
                     if len(password_text) < 20 and event.unicode.isprintable():
                         password_text += event.unicode
 
+    # ========== ОТРИСОВКА ТЕКУЩЕГО ЭКРАНА ==========
     if current_screen == "menu":
-        draw_menu()
+        draw_menu()  # Рисуем главное меню
     elif current_screen == "login":
-        draw_login_screen()
+        draw_login_screen()  # Рисуем экран входа
     elif current_screen == "register":
-        draw_register_screen()
+        draw_register_screen()  # Рисуем экран регистрации
     elif current_screen == "profile":
-        draw_profile_screen()
+        draw_profile_screen()  # Рисуем профиль
     elif current_screen == "settings":
-        draw_settings_screen()
+        draw_settings_screen()  # Рисуем настройки
+    elif current_screen == "a1":
+        a1()
+        current_screen = "profile"  # <--- ДОБАВИТЬ ЭТУ СТРОКУ
 
+    pygame.display.flip()  # Обновляем экран (показываем всё, что нарисовали)
+    clock.tick(60)  # Ограничиваем FPS до 60 кадров в секунду
 
-    pygame.display.flip()
-    clock.tick(60)
-
-
-pygame.quit()
-sys.exit()
+# ========== ЗАВЕРШЕНИЕ РАБОТЫ ==========
+pygame.quit()  # Закрываем все модули Pygame
+sys.exit()  # Завершаем программу
