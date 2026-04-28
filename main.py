@@ -849,7 +849,7 @@ def a3():
                         if text == 'C':  # Очистка
                             binary_input = ""
                             decimal_output = ""
-                        elif text == '<–':  # Удаление символа
+                        elif text == '<-':  # Удаление символа
                             binary_input = binary_input[:-1]
                             decimal_output = binary_to_decimal(binary_input)
                         elif text == '=':  # Вычисление
