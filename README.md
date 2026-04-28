@@ -33,8 +33,8 @@
 
 1.  Клонируйте репозиторий:
     ```bash
-    git clone https://github.com/tereshonkov-sys/Universal-Pygame-Calculator.git
-    cd Universal-Pygame-Calculator
+    git clone https://github.com/tereshonkov-sys/mnogofunc-calculator.git
+    cd mnogofunc-calculator
     ```
 
 2.  Установите необходимые зависимости:
