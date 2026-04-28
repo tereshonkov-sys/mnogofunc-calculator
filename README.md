@@ -33,7 +33,7 @@
 
 1.  Клонируйте репозиторий:
     ```bash
-    git clone https://github.com/ВАШ_НИК/Universal-Pygame-Calculator.git
+    git clone https://github.com/tereshonkov-sys/Universal-Pygame-Calculator.git
     cd Universal-Pygame-Calculator
     ```
 
@@ -98,8 +98,8 @@
 
 ## 👤 Автор
 
-Разработано **[Ваше Имя]**.
-Связаться со мной можно через [GitHub Issues](https://github.com/ВАШ_НИК/Universal-Pygame-Calculator/issues).
+Разработано **[Терешонковым Иваном]**.
+Связаться со мной можно через [GitHub Issues](https://github.com/tereshonkov-sys/Universal-Pygame-Calculator/issues).
 
 ---
 *Made with ❤️ and Python*
