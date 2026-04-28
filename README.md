@@ -4,7 +4,6 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Pygame](https://img.shields.io/badge/Pygame-2.0+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ## ✨ Особенности
 
