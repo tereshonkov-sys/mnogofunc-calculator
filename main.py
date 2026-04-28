@@ -738,6 +738,144 @@ def a2():
 
     return True
 
+
+def a3():
+    """Экран перевода из двоичной системы в десятичную"""
+    binary_input = ""  # Вводимое двоичное число (строка)
+    decimal_output = ""  # Результат перевода
+
+    btn_width = 470
+    btn_height = 100
+    start_x = 20
+    start_y = 180
+
+    # Кнопки: цифры 0-1, стрелка назад, очистка, равно
+    calc_buttons = [
+        ('0', start_x, start_y),
+        ('1', start_x + btn_width + 10, start_y),
+        ('<-', start_x, start_y + btn_height + 10),
+        ('C', start_x + btn_width + 10, start_y + btn_height + 10),
+    ]
+
+    def draw_calc_buttons():
+        for btn in calc_buttons:
+            text, x, y = btn
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if x < mouse_x < x + btn_width and y < mouse_y < y + btn_height:
+                color = DARK_BLUE
+            else:
+                color = current_theme_color
+            pygame.draw.rect(WINDOW, color, (x, y, btn_width, btn_height))
+            pygame.draw.rect(WINDOW, BLACK, (x, y, btn_width, btn_height), 3)
+            btn_font = pygame.font.Font(None, 42)
+            # Белый текст для тёмных кнопок
+            if sum(current_theme_color) < 382:
+                text_color = WHITE
+            else:
+                text_color = BLACK
+            text_surface = btn_font.render(text, True, text_color)
+            text_rect = text_surface.get_rect(center=(x + btn_width // 2, y + btn_height // 2))
+            WINDOW.blit(text_surface, text_rect)
+
+    def draw_calc_display():
+        display_rect = pygame.Rect(20, 100, WINDOW_WIDTH - 40, 70)
+        light_theme = tuple(min(c + 100, 255) for c in current_theme_color)
+        pygame.draw.rect(WINDOW, light_theme, display_rect)
+        pygame.draw.rect(WINDOW, BLACK, display_rect, 3)
+
+        # Показываем двоичное число
+        bin_label = small_font.render("Двоичное:", True, BLACK)
+        WINDOW.blit(bin_label, (30, 110))
+        bin_surface = big_font.render(binary_input, True, BLACK)
+        WINDOW.blit(bin_surface, (30, 130))
+
+        # Показываем десятичный результат
+        dec_label = small_font.render("Десятичное:", True, BLACK)
+        WINDOW.blit(dec_label, (WINDOW_WIDTH - 250, 110))
+        dec_surface = big_font.render(decimal_output, True, BLACK)
+        dec_rect = dec_surface.get_rect(right=WINDOW_WIDTH - 30, centery=145)
+        WINDOW.blit(dec_surface, dec_rect)
+
+    def binary_to_decimal(binary_str):
+        """Переводит двоичную строку в десятичное число"""
+        if not binary_str:
+            return ""
+        try:
+            # Проверяем, что все символы - 0 или 1
+            if all(c in '01' for c in binary_str):
+                return str(int(binary_str, 2))
+            else:
+                return "Ошибка: только 0 и 1"
+        except:
+            return "Ошибка"
+
+    back_btn = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT - 70, 200, 50)
+
+    running_calc = True
+    while running_calc:
+        # Фон цветом темы
+        if sum(current_theme_color) < 382:
+            bg_color = WHITE
+            text_color = BLACK
+        else:
+            bg_color = current_theme_color
+        WINDOW.fill(bg_color)
+
+        # Заголовок
+        title_text = font.render("ПЕРЕВОД ИЗ ДВОИЧНОЙ В ДЕСЯТИЧНУЮ", True, BLACK)
+        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 50))
+        WINDOW.blit(title_text, title_rect)
+
+        draw_calc_display()
+        draw_calc_buttons()
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        back_hover = back_btn.collidepoint(mouse_x, mouse_y)
+        draw_button(back_btn, "ВЫЙТИ", back_hover, RED, DARK_RED)
+        draw_settings_icon()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running_calc = False
+                return False
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if back_btn.collidepoint(event.pos):
+                    return True
+
+                for btn in calc_buttons:
+                    text, x, y = btn
+                    if x < event.pos[0] < x + btn_width and y < event.pos[1] < y + btn_height:
+                        if text == 'C':  # Очистка
+                            binary_input = ""
+                            decimal_output = ""
+                        elif text == '<–':  # Удаление символа
+                            binary_input = binary_input[:-1]
+                            decimal_output = binary_to_decimal(binary_input)
+                        elif text == '=':  # Вычисление
+                            decimal_output = binary_to_decimal(binary_input)
+                        else:  # Цифра 0 или 1
+                            binary_input += text
+                            decimal_output = binary_to_decimal(binary_input)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return True
+                elif event.key == pygame.K_RETURN:
+                    decimal_output = binary_to_decimal(binary_input)
+                elif event.key == pygame.K_BACKSPACE:
+                    binary_input = binary_input[:-1]
+                    decimal_output = binary_to_decimal(binary_input)
+                else:
+                    char = event.unicode
+                    if char in '01':  # Разрешаем только 0 и 1
+                        binary_input += char
+                        decimal_output = binary_to_decimal(binary_input)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+    return True
 # ========== ГЛАВНЫЙ ИГРОВОЙ ЦИКЛ ==========
 clock = pygame.time.Clock()  # Создаем объект Clock для управления FPS
 running = True  # Флаг работы главного цикла
@@ -1036,6 +1174,9 @@ while running:  # Бесконечный цикл, пока running = True
         current_screen = "profile"
     elif current_screen == "a2":
         a2()
+        current_screen = "profile"
+    elif current_screen == "a3":
+        a3()
         current_screen = "profile"
 
     pygame.display.flip()  # Обновляем экран (показываем всё, что нарисовали)
